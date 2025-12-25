@@ -19,16 +19,14 @@ public class Mother implements InheritanceRule {
         String reason = "";
         ShareType shareType = null;
 
-        if (c.hasChildren() ||
-                c.count(HeirType.SON_OF_SON) > 0 ||
-                c.count(HeirType.FULL_BROTHER) >= 2 ||
-                c.count(HeirType.PATERNAL_BROTHER) >= 2) {
+        if (c.hasDescendant() || hasMoreThanOneFullBrotherOrSister(c)
+        ) {
             fixedShare = FixedShare.SIXTH;
             shareType = ShareType.FIXED;
             reason = "الأم ترث السدس ً" +
-                    "عند وجود فرع وارث للمتوفى (ولد أو ابن الابن) أو عند وجود جمع من الإخوة (اثنين أو أكثر)" +
+                    "عند وجود فرع وارث للمتوفى (ولد  أو ابن الابن) أو عند وجود جمع من الإخوة (اثنين أو أكثر)" +
                     "قوله تعالى: \"وَلِأَبَوَيْهِ لِكُلِّ وَاحِدٍ مِّنْهُمَا السُّدُسُ مِمَّا تَرَكَ إِن كَانَ لَهُ وَلَدٌ\" (النساء: 11)";
-        } else if (c.has(HeirType.FATHER) && !c.hasChildren() && c.count(HeirType.SON_OF_SON) == 0) {
+        } else if (c.has(HeirType.FATHER) && !c.hasDescendant()) {
             fixedShare = FixedShare.SIXTH;
             shareType = ShareType.FIXED;
             reason = "الأم ترث السدس مع الأب" +
@@ -43,5 +41,11 @@ public class Mother implements InheritanceRule {
 
         }
         return new InheritanceShareDto(heirType,shareType,fixedShare,reason);
+    }
+    private boolean hasMoreThanOneFullBrotherOrSister(InheritanceCase c){
+        int fullSiblingsCount = 0;
+        fullSiblingsCount += c.count(HeirType.FULL_BROTHER);
+        fullSiblingsCount += c.count(HeirType.FULL_SISTER);
+        return fullSiblingsCount >= 2;
     }
 }
