@@ -28,6 +28,8 @@ public class InheritanceProblem {
 
     private Double totalValue;
 
+
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

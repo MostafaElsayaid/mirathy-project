@@ -8,6 +8,7 @@ import com.NTG.mirathy.Entity.InheritanceMember;
 import java.util.List;
 
 public record InheritanceMemberResponse(
+        String title,
         HeirType memberType,
         ShareType shareFraction,
         FixedShare fixedShare,

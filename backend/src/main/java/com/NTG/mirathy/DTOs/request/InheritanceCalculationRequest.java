@@ -24,8 +24,7 @@ public record InheritanceCalculationRequest(
         Map<
                 @NotNull(message = "Heir type must not be null")
                         HeirType,
-               // @NotNull(message = "Heir count must not be null")
-               // @Positive(message = "Heir count must be greater than zero")
+                @NotNull(message = "Heir count must not be null")
                         Integer> heirs
 ) {
 }
