@@ -75,7 +75,6 @@ public class AuthService {
         if (userRepository.existsByEmail(request.email())) {
             throw new RuntimeException("Email already registered");
         }
-
         User user = User.builder()
                 .fullName(request.fullName())
                 .email(request.email())
