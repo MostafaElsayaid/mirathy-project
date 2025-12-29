@@ -9,11 +9,11 @@ import java.util.List;
 
 public record InheritanceMemberResponse(
         String title,
-        HeirType memberType,
-        ShareType shareFraction,
+        HeirType heirType,
+        ShareType shareType,
         FixedShare fixedShare,
         Double shareValue,
         Integer memberCount,
-        String description
+        String reason
 ) {
 }

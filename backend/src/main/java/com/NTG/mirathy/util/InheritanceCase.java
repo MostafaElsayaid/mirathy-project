@@ -18,11 +18,12 @@ public class InheritanceCase {
             BigDecimal will,
             Map<HeirType, Integer> heirs
     ) {
-        this.totalEstate = totalEstate;
-        this.debts = debts;
-        this.will = will;
-        this.heirs=heirs==null?new HashMap<>():heirs;
+        this.totalEstate = totalEstate != null ? totalEstate : BigDecimal.ZERO;
+        this.debts = debts != null ? debts : BigDecimal.ZERO;
+        this.will = will != null ? will : BigDecimal.ZERO;
+        this.heirs = heirs != null ? new HashMap<>(heirs) : new HashMap<>();
     }
+
 
 
 
@@ -38,18 +39,41 @@ public class InheritanceCase {
         return has(HeirType.SON) || has(HeirType.DAUGHTER);
     }
 
+
     public boolean hasMaleChild() {
         return has(HeirType.SON);
     }
 
-    public boolean hasDescendant(){
-        return has(HeirType.SON)||has(HeirType.DAUGHTER)
-                ||has(HeirType.DAUGHTER_OF_SON)
-                ||has(HeirType.SON_OF_SON);
+    public boolean hasDescendant() {
+        return has(HeirType.SON) || has(HeirType.DAUGHTER)
+                || has(HeirType.DAUGHTER_OF_SON)
+                || has(HeirType.SON_OF_SON);
+    }
+
+    public boolean hasSpouse() {
+        return has(HeirType.HUSBAND) || has(HeirType.WIFE);
+    }
+
+    public int countMaleChildren() {
+        return count(HeirType.SON);
+    }
+    public int countFemaleChildren() {
+        return count(HeirType.DAUGHTER);
+    }
+    public int countTotalChildren() {
+        return countMaleChildren() + countFemaleChildren();
+    }
+    public boolean hasBrothersOrSisters() {
+        return has(HeirType.FULL_BROTHER) || has(HeirType.FULL_SISTER)
+                || has(HeirType.PATERNAL_BROTHER) || has(HeirType.PATERNAL_SISTER);
     }
 
     public BigDecimal getNetEstate() {
-        return  totalEstate.subtract(debts).subtract(will);
+        return totalEstate.subtract(debts).subtract(will).max(BigDecimal.ZERO);
+    }
+
+    public Map<HeirType, Integer> getHeirs() {
+        return new HashMap<>(heirs);
     }
 
 

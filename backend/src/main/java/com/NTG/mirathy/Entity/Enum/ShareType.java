@@ -12,7 +12,6 @@ public enum ShareType {
     Mahgub("محجوب"),
     MALE_DOUBLE_FEMALE("للذكر مثل حظ الأنثيين");
 
-    private final String text;
-
+    private final String arabicName;
 
 }

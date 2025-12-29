@@ -35,11 +35,6 @@ public class ProblemReportService {
         problemReport.setIsDeleted(false);
         ProblemReport savedProblemReport= problemReportRepo.save(problemReport);
         return problemReportsMapper.toProblemReportResponse(savedProblemReport);
-//                .title(returnedProblem.getTitle())
-//                .description(savedProblemReport.getDescription())
-//                .status(savedProblemReport.getStatus())
-//                .createdAt(savedProblemReport.getCreatedAt())
-//                .build();
     }
 
     public List<ProblemReportResponse> getAllProblemReports() {
