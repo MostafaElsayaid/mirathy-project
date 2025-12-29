@@ -18,29 +18,18 @@ public class HusbandRule implements InheritanceRule {
 
     @Override
     public InheritanceShareDto calculate(InheritanceCase c) {
-        BigDecimal netEstate = c.getNetEstate();
-        double amount;
-        FixedShare fixedShare;
-        String reason;
+        FixedShare share = c.hasDescendant()
+                ? FixedShare.QUARTER
+                : FixedShare.HALF;
 
-        if (c.hasChildren() || c.hasDescendant()) {
-            // الزوج له الربع عند وجود الفرع الوارث
-            amount = netEstate.multiply(BigDecimal.valueOf(1.0/4.0)).doubleValue();
-            fixedShare = FixedShare.QUARTER;
-            reason = "للزوج الربع لوجود الفرع الوارث";
-        } else {
-            // الزوج له النصف عند عدم وجود الفرع الوارث
-            amount = netEstate.multiply(BigDecimal.valueOf(1.0/2.0)).doubleValue();
-            fixedShare = FixedShare.HALF;
-            reason = "للزوج النصف لعدم وجود الفرع الوارث";
-        }
-
-        return new  InheritanceShareDto(
-                amount,
+        return new InheritanceShareDto(
+                null,
                 HeirType.HUSBAND,
                 ShareType.FIXED,
-                fixedShare,
-                reason
+                share,
+                c.hasDescendant()
+                        ? "للزوج الربع لوجود فرع وارث"
+                        : "للزوج النصف لعدم وجود فرع وارث"
         );
     }
 }

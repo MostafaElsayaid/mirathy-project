@@ -8,29 +8,34 @@ import com.NTG.mirathy.util.InheritanceCase;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-
 @Component
-public class FatherRule implements InheritanceRule {
+public class MotherRule implements InheritanceRule {
 
     @Override
     public boolean canApply(InheritanceCase c) {
-        return c.has(HeirType.FATHER);
+        return c.has(HeirType.MOTHER);
     }
 
     @Override
     public InheritanceShareDto calculate(InheritanceCase c) {
 
-        if (c.hasDescendant()) {
+        if (c.hasDescendant() || c.hasBrothersOrSisters()) {
             return new InheritanceShareDto(
                     null,
-                    HeirType.FATHER,
+                    HeirType.MOTHER,
                     ShareType.FIXED,
                     FixedShare.SIXTH,
-                    "الأب يرث السدس لوجود فرع وارث"
+                    "الأم ترث السدس لوجود فرع وارث أو جمع من الإخوة"
             );
         }
 
-        // التعصيب سيضاف لاحقًا في السيرفيس
-        return null;
+        return new InheritanceShareDto(
+                null,
+                HeirType.MOTHER,
+                ShareType.FIXED,
+                FixedShare.THIRD,
+                "الأم ترث الثلث لعدم وجود فرع وارث ولا إخوة"
+        );
     }
 }
+

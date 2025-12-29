@@ -1,9 +1,12 @@
 package com.NTG.mirathy.Entity.Enum;
 
+import lombok.Getter;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 
+@Getter
 public enum FixedShare {
     HALF(1, 2),
     QUARTER(1, 4),
@@ -12,6 +15,7 @@ public enum FixedShare {
     THIRD(1, 3),
     SIXTH(1, 6);
 
+
     private final int numerator;
     private final int denominator;
 
@@ -19,14 +23,4 @@ public enum FixedShare {
         this.numerator = numerator;
         this.denominator = denominator;
     }
-
-    public String fraction() {
-        return numerator + "/" + denominator;
-    }
-
-    public BigDecimal decimalValue() {
-        return BigDecimal.valueOf(numerator)
-                .divide(BigDecimal.valueOf(denominator), 4, RoundingMode.HALF_UP);
-    }
-
 }

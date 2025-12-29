@@ -14,9 +14,11 @@ public class RuleConfiguration {
     public List<InheritanceRule> inheritanceRules(
             HusbandRule husband,
             DaughterRule daughter,
-            Mother mother,
+            MotherRule mother,
             WifeRule wifeRule,
-            FatherRule father
+            FatherRule father,
+            SonRule son,
+            GrandfatherRule grandfatherRule
 
     ) {
         return List.of(
@@ -24,7 +26,9 @@ public class RuleConfiguration {
                 daughter,
                 mother,
                 wifeRule,
-                father
+                father,
+                son,
+                grandfatherRule
         );
     }
 }

@@ -17,39 +17,18 @@ public class WifeRule implements InheritanceRule {
 
     @Override
     public InheritanceShareDto calculate(InheritanceCase c) {
-        BigDecimal netEstate = c.getNetEstate();
-        int wifeCount = c.count(HeirType.WIFE);
-        Double amount;
-        FixedShare fixedShare;
-        String reason;
-
-        if (c.hasChildren() || c.hasDescendant()) {
-            // الزوجة/الزوجات لهن الثمن عند وجود الفرع الوارث
-            amount = netEstate.multiply(BigDecimal.valueOf(1.0/8.0)).doubleValue();
-            fixedShare = FixedShare.EIGHTH;
-            reason = wifeCount > 1 ?
-                    "للزوجات الثمن لوجود الفرع الوارث" :
-                    "للزوجة الثمن لوجود الفرع الوارث";
-        } else {
-            // الزوجة/الزوجات لهن الربع عند عدم وجود الفرع الوارث
-            amount = netEstate.multiply(BigDecimal.valueOf(1.0/4.0)).doubleValue();
-            fixedShare = FixedShare.QUARTER;
-            reason = wifeCount > 1 ?
-                    "للزوجات الربع لعدم وجود الفرع الوارث" :
-                    "للزوجة الربع لعدم وجود الفرع الوارث";
-        }
-
-        // تقسيم المبلغ على عدد الزوجات إذا كن أكثر من واحدة
-        if (wifeCount > 1) {
-            amount = amount / wifeCount;
-        }
+        FixedShare share = c.hasDescendant()
+                ? FixedShare.EIGHTH
+                : FixedShare.QUARTER;
 
         return new InheritanceShareDto(
-                amount,
+                null,
                 HeirType.WIFE,
                 ShareType.FIXED,
-                fixedShare,
-                reason
+                share,
+                c.hasDescendant()
+                        ? "للزوجات الثمن لوجود فرع وارث"
+                        : "للزوجات الربع لعدم وجود فرع وارث"
         );
     }
 }
