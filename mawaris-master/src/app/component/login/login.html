@@ -3,6 +3,7 @@
   <div class="w-full max-w-md bg-[#fdfcf9] rounded-2xl shadow-lg px-6 py-12 text-center">
 
     <img src="LOGO.png" alt="Logo" class="h-14 mx-auto mb-2" />
+    
     <h2 class="text-2xl font-bold text-green-900 mb-3 py-3">
       تسجيل الدخول إلى حسابك
     </h2>
@@ -17,7 +18,6 @@
 
       <div class="relative">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-          <!-- أيقونة الإيميل -->
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
             <path stroke-linecap="round" stroke-linejoin="round"
@@ -39,7 +39,6 @@
         </div>
       </div>
 
-      <!-- Password -->
       <div class="relative">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -55,15 +54,14 @@
                [class.border-gray-300]="!f['password'].dirty && !f['password'].touched"
                [class.focus:ring-red-500]="f['password'].invalid && (f['password'].dirty || f['password'].touched)"
                [class.focus:ring-green-900]="f['password'].valid && f['password'].dirty"/>
-        <!-- رسائل الخطأ -->
-        <div *ngIf="f['password'].invalid && (f['password'].dirty || f['password'].touched)"
+
+               <div *ngIf="f['password'].invalid && (f['password'].dirty || f['password'].touched)"
              class="mt-1 text-right text-xs text-red-600 space-y-1">
           <div *ngIf="f['password'].errors?.['required']">كلمة المرور مطلوبة</div>
           <div *ngIf="f['password'].errors?.['minlength']">كلمة المرور يجب أن تكون 6 أحرف على الأقل</div>
         </div>
       </div>
 
-      <!-- زر تسجيل الدخول -->
       <button type="submit" [disabled]="isLoading"
               [class.bg-green-600]="loginForm.valid"
               [class.hover:bg-green-700]="loginForm.valid"

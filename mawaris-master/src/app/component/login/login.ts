@@ -1,5 +1,4 @@
-
-import {ChangeDetectorRef, Component, inject, OnChanges, SimpleChanges} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -12,8 +11,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class Login implements OnChanges{
-  private cdr = inject(ChangeDetectorRef);
+export class Login {
 
   loginForm: FormGroup;
   isLoading = false;
@@ -45,26 +43,16 @@ export class Login implements OnChanges{
 
     const { email, password } = this.loginForm.value;
 
-    console.log(this.loginForm.value);
-
     this.authService.login(email, password).subscribe({
       next: () => {
         this.router.navigate(['/home']);
         this.isLoading = false;
       },
-      error: (message: string) => {
-        this.errorMessage = message;
-        this.isLoading = false;
-        this.cdr.detectChanges();
-        console.log(message);
-      },
-      complete: () => {
+      error: (err) => {
+        this.errorMessage =
+          err?.error?.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
         this.isLoading = false;
       }
     });
-
-  }
-  ngOnChanges() {
-    this.onSubmit();
   }
 }

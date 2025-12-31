@@ -1,0 +1,104 @@
+<div class="min-h-screen flex items-center justify-center bg-[#f3efe9] px-4" dir="rtl">
+
+  <div class="w-full max-w-lg bg-[#fdfcf9] rounded-2xl shadow-lg px-8 py-10 text-center">
+
+    <!-- Title -->
+    <h2 class="text-3xl font-bold text-green-900 mb-2">
+     تواصل معانا
+    </h2>
+
+    <p class="text-sm text-gray-600 mb-8">
+      هل لديك أسئلة أو ملاحظات؟ نحن نسمع منك.
+    </p>
+
+    <!-- Form -->
+    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+      <!-- Name -->
+      <div class="text-right">
+        <label class="block mb-2 text-sm font-medium text-gray-700">
+          الاسم
+        </label>
+        <input
+          type="text"
+          formControlName="name"
+          placeholder="اكتب اسمك"
+          class="w-full px-4 py-3 border rounded-lg text-sm
+                 focus:outline-none focus:ring-1"
+          [class.border-red-500]="isSubmitted && f['name'].invalid"
+          [class.border-gray-300]="!isSubmitted"
+          [class.focus:ring-red-500]="isSubmitted && f['name'].invalid"
+          [class.focus:ring-green-900]="f['name'].valid"
+        />
+
+        <div *ngIf="isSubmitted && f['name'].invalid" class="text-xs text-red-600 mt-1">
+          الاسم مطلوب (3 حروف على الأقل)
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="text-right">
+        <label class="block mb-2 text-sm font-medium text-gray-700">
+          البريد الإلكتروني
+        </label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="example@email.com"
+          class="w-full px-4 py-3 border rounded-lg text-sm
+                 focus:outline-none focus:ring-1"
+          [class.border-red-500]="isSubmitted && f['email'].invalid"
+          [class.border-gray-300]="!isSubmitted"
+          [class.focus:ring-red-500]="isSubmitted && f['email'].invalid"
+          [class.focus:ring-green-900]="f['email'].valid"
+        />
+
+        <div *ngIf="isSubmitted && f['email'].invalid" class="text-xs text-red-600 mt-1">
+          بريد إلكتروني غير صالح
+        </div>
+      </div>
+
+      <!-- Message -->
+      <div class="text-right">
+        <label class="block mb-2 text-sm font-medium text-gray-700">
+          الرسالة
+        </label>
+        <textarea
+          rows="5"
+          formControlName="message"
+          placeholder="اكتب رسالتك هنا..."
+          class="w-full px-4 py-3 border rounded-lg text-sm resize-none
+                 focus:outline-none focus:ring-1"
+          [class.border-red-500]="isSubmitted && f['message'].invalid"
+          [class.border-gray-300]="!isSubmitted"
+          [class.focus:ring-red-500]="isSubmitted && f['message'].invalid"
+          [class.focus:ring-green-900]="f['message'].valid">
+        </textarea>
+
+        <div *ngIf="isSubmitted && f['message'].invalid" class="text-xs text-red-600 mt-1">
+          الرسالة يجب ألا تقل عن 10 حروف
+        </div>
+      </div>
+
+      <!-- Button -->
+      <button
+        type="submit"
+        [disabled]="isLoading"
+        class="w-full bg-green-900 hover:bg-green-800 text-white py-3 rounded-lg
+               text-sm font-medium transition flex items-center justify-center gap-2">
+
+        <span *ngIf="!isLoading">إرسال الرسالة</span>
+        <span *ngIf="isLoading">جاري الإرسال...</span>
+
+        <svg *ngIf="!isLoading" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke-width="1.5"
+             stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M6 12 3.269 3.757a59.768 59.768 0 0 1 17.036 6.568
+                   59.768 59.768 0 0 1-17.036 6.568L6 12z" />
+        </svg>
+      </button>
+
+    </form>
+  </div>
+</div>

@@ -44,10 +44,8 @@ public class InheritanceCalculationService {
         int origin = calculateOrigin(fixedShares);
         Map<InheritanceShareDto, BigDecimal> shareMap = calculateFixedShares(origin, fixedShares);
 
-        //  مجموع الفروض
         BigDecimal fixedSum = shareMap.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // التعصيب: الابناء والبنات فقط
         BigDecimal remaining = BigDecimal.valueOf(origin).subtract(fixedSum);
         boolean hasChildren = c.countMaleChildren() > 0 || c.countFemaleChildren() > 0;
 
@@ -55,15 +53,12 @@ public class InheritanceCalculationService {
             applyChildrenAsaba(c, shareMap, remaining);
         }
 
-        // الرد الشرعي إذا لم يوجد عاصب
         if (remaining.compareTo(BigDecimal.ZERO) > 0 && !hasChildren) {
             applyRaddExcludingSpouses(shareMap, remaining);
         }
 
-        // العَول (Awl) لو مجموع الأسهم تجاوز الأصل
         shareMap = applyAwlIfNeeded(shareMap, origin);
 
-        // تحويل الأسهم لمبالغ دقيقة
         List<InheritanceShareDto> finalShares = convertToAmountsPrecise(netEstate, origin, shareMap);
 
         BigDecimal distributed = finalShares.stream()
