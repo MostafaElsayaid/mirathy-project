@@ -5,7 +5,9 @@ import com.NTG.mirathy.Entity.Enum.FixedShare;
 import com.NTG.mirathy.Entity.Enum.HeirType;
 import com.NTG.mirathy.Entity.Enum.ShareType;
 import com.NTG.mirathy.util.InheritanceCase;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MotherGrandmother implements InheritanceRule {
 
     @Override
