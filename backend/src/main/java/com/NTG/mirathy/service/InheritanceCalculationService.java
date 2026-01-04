@@ -63,6 +63,7 @@ public class InheritanceCalculationService {
         //حساب اصل المسأله
         int origin = calculateOrigin(fixedShares);
 
+
         Map<HeirType, InheritanceShareDto> dtoMap = new LinkedHashMap<>();
         Map<HeirType, BigDecimal> sharesMap = new LinkedHashMap<>();
         Map<HeirType, Integer> countMap = new LinkedHashMap<>();
@@ -73,10 +74,38 @@ public class InheritanceCalculationService {
 
             FixedShare fs = dto.fixedShare();
 
-            BigDecimal shareUnits =
-                    BigDecimal.valueOf(origin)
-                            .multiply(BigDecimal.valueOf(fs.getNumerator()))
-                            .divide(BigDecimal.valueOf(fs.getDenominator()), 10, RoundingMode.HALF_UP);
+            BigDecimal shareUnits;
+
+//  العمريّة (ثلث الباقي)
+            if (fs == FixedShare.THIRD_OF_REMAINDER) {
+
+                BigDecimal spouseShare = fixedShares.stream()
+                        .filter(d ->
+                                d.heirType() == HeirType.WIFE ||
+                                        d.heirType() == HeirType.HUSBAND
+                        )
+                        .map(d -> {
+                            FixedShare s = d.fixedShare();
+                            return BigDecimal.valueOf(origin)
+                                    .multiply(BigDecimal.valueOf(s.getNumerator()))
+                                    .divide(BigDecimal.valueOf(s.getDenominator()), 10, RoundingMode.HALF_UP);
+                        })
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                BigDecimal remainder = BigDecimal.valueOf(origin).subtract(spouseShare);
+
+                shareUnits = remainder
+                        .divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP);
+            }
+
+                  // باقي الفروض
+            else {
+                shareUnits =
+                        BigDecimal.valueOf(origin)
+                                .multiply(BigDecimal.valueOf(fs.getNumerator()))
+                                .divide(BigDecimal.valueOf(fs.getDenominator()), 10, RoundingMode.HALF_UP);
+            }
+
 
             dtoMap.put(dto.heirType(), dto);
             sharesMap.put(dto.heirType(), shareUnits);
@@ -143,16 +172,28 @@ public class InheritanceCalculationService {
         int totalUnits = 0;
         Map<HeirType, Integer> unitsMap = new LinkedHashMap<>();
 
+//        for (InheritanceShareDto dto : asabaShares) {
+//            HeirType type = dto.heirType();
+//            int count = c.count(type);
+//
+//            if (count > 0 && type.isTaasib()) {
+//                int units = count * type.getUnit();
+//                unitsMap.put(type, units);
+//                totalUnits += units;
+//            }
+//        }
         for (InheritanceShareDto dto : asabaShares) {
             HeirType type = dto.heirType();
             int count = c.count(type);
 
-            if (count > 0 && type.isTaasib()) {
-                int units = count * type.getUnit(); // ⭐ الذكر 2 – الأنثى 1
+            if (count > 0) {
+                int units = count * type.getAsabaUnit(type);
                 unitsMap.put(type, units);
                 totalUnits += units;
             }
         }
+
+
 
         if (totalUnits == 0) return;
 
@@ -202,31 +243,41 @@ public class InheritanceCalculationService {
         }
 
         //  الرد
+        // الرد
         else if (total.compareTo(originBD) < 0) {
 
             BigDecimal remaining = originBD.subtract(total);
             BigDecimal fixedTotal = BigDecimal.ZERO;
 
+            // نجمع فقط أصحاب الفروض الذين يَرِد عليهم (غير الزوجين)
             for (HeirType type : sharesMap.keySet()) {
-                if (dtoMap.get(type).shareType() == ShareType.FIXED) {
+                InheritanceShareDto dto = dtoMap.get(type);
+
+                if (dto.shareType() == ShareType.FIXED && !type.isSpouse()) {
                     fixedTotal = fixedTotal.add(sharesMap.get(type));
                 }
             }
 
             if (fixedTotal.compareTo(BigDecimal.ZERO) > 0) {
                 for (HeirType type : sharesMap.keySet()) {
-                    if (dtoMap.get(type).shareType() == ShareType.FIXED) {
+                    InheritanceShareDto dto = dtoMap.get(type);
+
+                    if (dto.shareType() == ShareType.FIXED && !type.isSpouse()) {
                         BigDecimal current = sharesMap.get(type);
                         BigDecimal fraction =
                                 current.divide(fixedTotal, 10, RoundingMode.HALF_UP);
-                        sharesMap.put(type, current.add(remaining.multiply(fraction)));
+
+                        sharesMap.put(
+                                type,
+                                current.add(remaining.multiply(fraction))
+                        );
                     }
                 }
             }
         }
     }
 
-    private int calculateOrigin(List<InheritanceShareDto> shares) {
+        private int calculateOrigin(List<InheritanceShareDto> shares) {
         return shares.stream()
                 .map(InheritanceShareDto::fixedShare)
                 .filter(Objects::nonNull)

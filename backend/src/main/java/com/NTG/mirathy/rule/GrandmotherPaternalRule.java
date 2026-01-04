@@ -11,8 +11,7 @@ public class GrandmotherPaternalRule implements InheritanceRule {
     @Override
     public boolean canApply(InheritanceCase c) {
         if (!c.has(HeirType.GRANDMOTHER_PATERNAL)) return false;
-        if (c.has(HeirType.FATHER) || c.has(HeirType.GRANDFATHER)) return false;
-        return true;
+        return !c.has(HeirType.FATHER) && !c.has(HeirType.GRANDFATHER);
     }
 
     @Override
@@ -36,7 +35,7 @@ public class GrandmotherPaternalRule implements InheritanceRule {
                 null,
                 shareType,
                 fixedShare,
-                null
+                reason
         );
     }
 }

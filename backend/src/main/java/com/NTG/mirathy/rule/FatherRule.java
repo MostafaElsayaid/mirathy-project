@@ -8,36 +8,38 @@ import org.springframework.stereotype.Component;
 @Component
 public class FatherRule implements InheritanceRule {
 
-    @Override
-    public boolean canApply(InheritanceCase c) {
-        return c.has(HeirType.FATHER);
-    }
 
-    @Override
-    public InheritanceShareDto calculate(InheritanceCase c) {
-        HeirType heirType = HeirType.FATHER;
-        int count = c.count(heirType);
-        ShareType shareType = null;
-        FixedShare fixedShare = null;
-        String reason = "";
-
-        if (c.hasDescendant()) {
-            shareType = ShareType.FIXED;
-            fixedShare = FixedShare.SIXTH;
-            reason = "يرث الأب السدس فقط فى حالة وجود الفرع الوارث المذكر (مثل الابن وابن الابن ). قال تعالى (وَلأَبَوَيْهِ لِكُلِّ وَاحِدٍ مِنْهُمَا السُّدُسُ مِمَّا تَرَكَ إِنْ كَانَ لَهُ وَلَدٌ)";
-        } else {
-            shareType = ShareType.TAASIB;
-            reason = "الأب يرث تعصيبًا بعد أصحاب الفروض";
+        @Override
+        public boolean canApply(InheritanceCase c) {
+            return c.has(HeirType.FATHER);
         }
 
-        return new InheritanceShareDto(
-                heirType,
-                count,
-                null,
-                null,
-                shareType,
-                fixedShare,
-                reason
-        );
+        @Override
+        public InheritanceShareDto calculate(InheritanceCase c) {
+            HeirType heirType = HeirType.FATHER;
+            int count = c.count(heirType);
+            ShareType shareType = null;
+            FixedShare fixedShare = null;
+            String reason = "";
+
+            if (c.hasDescendant()) {
+                shareType = ShareType.FIXED;
+                fixedShare = FixedShare.SIXTH;
+                reason = "يرث الأب السدس لوجود فرع وارث";
+            }
+            else {
+                shareType = ShareType.TAASIB;
+                reason = "يرث الأب الباقى تعصيباً فى حالة عدم الفرع الوارث المذكر والمؤنث . قال ﷺ ( ألحقوا الفرائض بأهلها فما بقى فهو لأولى رجل ذكر.)";
+            }
+            System.out.print(shareType + ""+ fixedShare + reason);
+            return new InheritanceShareDto(
+                    heirType,
+                    count,
+                    null,
+                    null,
+                    shareType,
+                    fixedShare,
+                    reason
+            );
+        }
     }
-}

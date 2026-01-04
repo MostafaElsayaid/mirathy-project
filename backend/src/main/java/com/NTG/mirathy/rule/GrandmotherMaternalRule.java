@@ -11,8 +11,7 @@ public class GrandmotherMaternalRule implements InheritanceRule {
     @Override
     public boolean canApply(InheritanceCase c) {
         if (!c.has(HeirType.GRANDMOTHER_MATERNAL)) return false;
-        if (c.has(HeirType.MOTHER)) return false;
-        return true;
+        return !c.has(HeirType.MOTHER);
     }
 
     @Override

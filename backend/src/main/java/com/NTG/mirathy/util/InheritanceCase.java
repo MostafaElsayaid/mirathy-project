@@ -77,4 +77,12 @@ public class InheritanceCase {
     }
 
 
+    public int countSiblings() {
+        return count(HeirType.FULL_BROTHER)+count(HeirType.FULL_SISTER)
+                +count(HeirType.PATERNAL_BROTHER)+count(HeirType.PATERNAL_SISTER)
+                +count(HeirType.MATERNAL_BROTHER)+count(HeirType.MATERNAL_SISTER);
+    }
+    public int mapSize() {
+        return heirs.size();
+    }
 }

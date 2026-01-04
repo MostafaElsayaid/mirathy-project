@@ -53,29 +53,61 @@ public enum HeirType {
 
         //منطق التعصيب
 
-    public boolean isTaasib() {
-        return switch (this) {
+//    public boolean isTaasib() {
+//        return switch (this) {
+//
+//            case SON, DAUGHTER,
+//                 SON_OF_SON, DAUGHTER_OF_SON,
+//
+//
+//                 FULL_BROTHER, FULL_SISTER,
+//                 PATERNAL_BROTHER, PATERNAL_SISTER,
+//
+//                 SON_OF_FULL_BROTHER,
+//                 SON_OF_PATERNAL_BROTHER,
+//                 FULL_UNCLE,
+//                 PATERNAL_UNCLE,
+//                 SON_OF_FULL_UNCLE,
+//                 SON_OF_PATERNAL_UNCLE
+//                    -> true;
+//
+//            default -> false;
+//        };
+//    }
 
-            // فروع
-            case SON, DAUGHTER,
-                 SON_OF_SON, DAUGHTER_OF_SON,
+    public int getAsabaUnit(HeirType type) {
+        return switch (type) {
 
-                 // إخوة
-                 FULL_BROTHER, FULL_SISTER,
-                 PATERNAL_BROTHER, PATERNAL_SISTER,
-
-                 // عصبات بالنفس
+            // الذكور = 2
+            case SON,
+                 SON_OF_SON,
+                 FULL_BROTHER,
+                 PATERNAL_BROTHER,
                  SON_OF_FULL_BROTHER,
                  SON_OF_PATERNAL_BROTHER,
                  FULL_UNCLE,
                  PATERNAL_UNCLE,
                  SON_OF_FULL_UNCLE,
                  SON_OF_PATERNAL_UNCLE
-                    -> true;
+                    -> 2;
 
-            default -> false;
+            // الإناث = 1
+            case DAUGHTER,
+                 DAUGHTER_OF_SON,
+                 FULL_SISTER,
+                 PATERNAL_SISTER
+                    -> 1;
+
+            // عصبة بالنفس بوحدة واحدة
+            case FATHER,
+                 GRANDFATHER
+                    -> 1;
+
+            default -> 0;
         };
     }
+
+
 
     public int getUnit() {
         return switch (this) {
@@ -100,5 +132,8 @@ public enum HeirType {
 
             default -> 0;
         };
+    }
+    public boolean isSpouse() {
+        return this == HUSBAND || this == WIFE;
     }
 }

@@ -10,9 +10,7 @@ public class GrandfatherRule implements InheritanceRule {
 
     @Override
     public boolean canApply(InheritanceCase c) {
-        if (!c.has(HeirType.GRANDFATHER)) return false;
-        if (c.has(HeirType.FATHER)) return false;
-        return true;
+        return c.has(HeirType.GRANDFATHER) && !c.has(HeirType.FATHER);
     }
 
     @Override
