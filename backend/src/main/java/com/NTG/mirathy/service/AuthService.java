@@ -83,7 +83,7 @@ public class AuthService {
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .role(Role.USER)
-                .isActive(false)
+                .isActive(true)
                 .build();
 
         User savedUser = userRepository.save(user);
