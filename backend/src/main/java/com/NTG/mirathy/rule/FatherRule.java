@@ -9,37 +9,53 @@ import org.springframework.stereotype.Component;
 public class FatherRule implements InheritanceRule {
 
 
-        @Override
-        public boolean canApply(InheritanceCase c) {
-            return c.has(HeirType.FATHER);
-        }
+    @Override
+    public boolean canApply(InheritanceCase c) {
+        return c.has(HeirType.FATHER);
+    }
 
-        @Override
-        public InheritanceShareDto calculate(InheritanceCase c) {
-            HeirType heirType = HeirType.FATHER;
-            int count = c.count(heirType);
-            ShareType shareType = null;
-            FixedShare fixedShare = null;
-            String reason = "";
+    @Override
+    public InheritanceShareDto calculate(InheritanceCase c) {
 
-            if (c.hasDescendant()) {
-                shareType = ShareType.FIXED;
-                fixedShare = FixedShare.SIXTH;
-                reason = "يرث الأب السدس لوجود فرع وارث";
+        int count = c.count(HeirType.FATHER);
+
+        // وجود فرع وارث
+        if (c.hasDescendant()) {
+
+            // فرع وارث ذكر → سدس فقط
+            if (c.hasMaleChild()) {
+                return new InheritanceShareDto(
+                        HeirType.FATHER,
+                        count,
+                        null,
+                        null,
+                        ShareType.FIXED,
+                        FixedShare.SIXTH,
+                        "يرث الأب السدس لوجود فرع وارث ذكر"
+                );
             }
-            else {
-                shareType = ShareType.TAASIB;
-                reason = "يرث الأب الباقى تعصيباً فى حالة عدم الفرع الوارث المذكر والمؤنث . قال ﷺ ( ألحقوا الفرائض بأهلها فما بقى فهو لأولى رجل ذكر.)";
-            }
-            System.out.print(shareType + ""+ fixedShare + reason);
+
+            // فرع وارث أنثى فقط → سدس + تعصيب
             return new InheritanceShareDto(
-                    heirType,
+                    HeirType.FATHER,
                     count,
                     null,
                     null,
-                    shareType,
-                    fixedShare,
-                    reason
+                    ShareType.MIXED,
+                    FixedShare.SIXTH,
+                    "يرث الأب السدس فرضًا والباقي تعصيبًا لوجود فرع وارث أنثى"
             );
         }
+
+        // لا يوجد فرع وارث
+        return new InheritanceShareDto(
+                HeirType.FATHER,
+                count,
+                null,
+                null,
+                ShareType.TAASIB,
+                null,
+                "يرث الأب الباقي تعصيبًا لعدم وجود فرع وارث"
+        );
+    }
     }

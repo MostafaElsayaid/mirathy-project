@@ -10,6 +10,7 @@ public enum ShareType {
     TAASIB("تعصيبًا"),
     RADD("ردًا"),
     Mahgub("محجوب"),
+    MIXED("فرضًا وتعصيبًا"),
     MALE_DOUBLE_FEMALE("للذكر مثل حظ الأنثيين");
 
     private final String arabicName;

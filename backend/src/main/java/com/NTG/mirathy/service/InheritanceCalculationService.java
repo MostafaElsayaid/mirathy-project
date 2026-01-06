@@ -53,11 +53,14 @@ public class InheritanceCalculationService {
         List<InheritanceShareDto> asabaShares = new ArrayList<>();
 
         for (InheritanceShareDto dto : allShares) {
-            if (dto.shareType() == ShareType.FIXED) {
+            if (dto.shareType() == ShareType.FIXED || dto.shareType() == ShareType.MIXED) {
                 fixedShares.add(dto);
-            } else if (dto.shareType() == ShareType.TAASIB) {
+            }
+
+            if (dto.shareType() == ShareType.TAASIB || dto.shareType() == ShareType.MIXED) {
                 asabaShares.add(dto);
             }
+
         }
 
         //حساب اصل المسأله
@@ -231,7 +234,6 @@ public class InheritanceCalculationService {
 
         BigDecimal originBD = BigDecimal.valueOf(origin);
 
-        //  العول
         if (total.compareTo(originBD) > 0) {
             for (HeirType type : sharesMap.keySet()) {
                 BigDecimal adjusted =
@@ -240,16 +242,27 @@ public class InheritanceCalculationService {
                                 .divide(total, 10, RoundingMode.HALF_UP);
                 sharesMap.put(type, adjusted);
             }
+            return;
         }
 
-        //  الرد
-        // الرد
-        else if (total.compareTo(originBD) < 0) {
+
+        boolean hasAsaba =
+                dtoMap.values().stream()
+                        .anyMatch(dto ->
+                                dto.shareType() == ShareType.TAASIB
+                                        || dto.shareType() == ShareType.MIXED
+                        );
+
+        if (hasAsaba) {
+            return; //  لا رد مع وجود عاصب (الأب / الجد)
+        }
+        //الرد (عند عدم وجود عاصب)
+        if (total.compareTo(originBD) < 0) {
 
             BigDecimal remaining = originBD.subtract(total);
             BigDecimal fixedTotal = BigDecimal.ZERO;
 
-            // نجمع فقط أصحاب الفروض الذين يَرِد عليهم (غير الزوجين)
+            // نجمع أصحاب الفروض الذين يرد عليهم (غير الزوجين)
             for (HeirType type : sharesMap.keySet()) {
                 InheritanceShareDto dto = dtoMap.get(type);
 
@@ -277,7 +290,8 @@ public class InheritanceCalculationService {
         }
     }
 
-        private int calculateOrigin(List<InheritanceShareDto> shares) {
+
+    private int calculateOrigin(List<InheritanceShareDto> shares) {
         return shares.stream()
                 .map(InheritanceShareDto::fixedShare)
                 .filter(Objects::nonNull)
