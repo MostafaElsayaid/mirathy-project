@@ -1,67 +1,5 @@
-<!-- <nav class="bg-white/80 backdrop-blur-md shadow-sm ">
-  <div
-    class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between"
-    dir="rtl"
-  >
-   
-    <div class="flex items-center gap-2">
-      <img src="LOGO.png" alt="Logo" class="h-10 w-auto" />
-    </div>
 
-    
-    <div class="flex items-center gap-12">
-     
-      <ul class="flex items-center gap-8 text-gray-700 font-medium">
-        <li class="hover:text-green-700 cursor-pointer">
-          <a routerLink="/home" routerLinkActive="text-green-700">الرئيسية</a>
-        </li>
-
-        <li class="hover:text-green-700 cursor-pointer">
-          <a routerLink="/about" routerLinkActive="text-green-700">عن الموقع</a>
-        </li>
-
-        <li
-          *ngIf="authService.isLoggedIn$() as isLoggedIn"
-          [ngClass]="{ 'hover:text-green-700 cursor-pointer': isLoggedIn }"
-        >
-          <a
-            *ngIf="isLoggedIn"
-            routerLink="/history"
-            routerLinkActive="text-green-700"
-          >
-            السجل
-          </a>
-        </li>
-
-        <li class="hover:text-green-700 cursor-pointer">
-          <a routerLink="/contact" routerLinkActive="text-green-700">
-            اتصل بنا
-          </a>
-        </li>
-      </ul>
-
-      
-      <div class="flex items-center gap-4">
-        <a *ngIf="!(authService.isLoggedIn$())" routerLink="/login">
-          <button
-            class="bg-green-900 text-white px-5 py-2 cursor-pointer rounded-md hover:bg-green-800 transition"
-          >
-            تسجيل الدخول
-          </button>
-        </a>
-
-        <button
-          *ngIf="authService.isLoggedIn$()"
-          (click)="logout()"
-          class="bg-red-600 text-white px-5 py-2 cursor-pointer rounded-md hover:bg-red-700 transition"
-        >
-          تسجيل الخروج
-        </button>
-      </div>
-    </div>
-  </div>
-</nav> -->
-<nav class="bg-white/80 backdrop-blur-md shadow-sm ">
+<nav  class="bg-white/80 backdrop-blur-md shadow-sm relative z-50 ">
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between" dir="rtl">
 
     <div class="flex items-center gap-2">
@@ -83,8 +21,8 @@
       </button>
     </div>
 
-    <div class="hidden lg:flex items-center gap-12">
-      <ul class="flex items-center gap-8 text-gray-700 font-medium">
+    <div class="hidden lg:flex items-center w-full relative">
+      <ul class="flex items-center gap-8 text-gray-700 font-medium mx-auto">
         <li class="hover:text-green-700 cursor-pointer">
           <a routerLink="/home" routerLinkActive="text-green-700">الرئيسية</a>
         </li>
@@ -108,7 +46,8 @@
       </div>
     </div>
 
-    <div *ngIf="menuOpen" class="lg:hidden absolute top-full right-0 w-full bg-white/90 backdrop-blur-md shadow-md px-6 py-4">
+    <div *ngIf="menuOpen"
+  class="lg:hidden absolute top-full right-0 w-full bg-white/95 backdrop-blur-md shadow-md px-6 py-4 z-50">
       <ul class="flex flex-col gap-4 text-gray-700 font-medium">
         <li><a routerLink="/home" (click)="menuOpen=false" class="hover:text-green-700">الرئيسية</a></li>
         <li><a routerLink="/about" (click)="menuOpen=false" class="hover:text-green-700">عن الموقع</a></li>

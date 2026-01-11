@@ -2,7 +2,7 @@ import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { HistoryService, SavedCase } from '../../services/history.service';
+import {HistoryProblem, HistoryProblemDetails, HistoryService, SavedCase} from '../../services/history.service';
 import { LanguageService } from '../../services/language.service';
 
 @Component({
@@ -13,144 +13,149 @@ import { LanguageService } from '../../services/language.service';
   styleUrl: './history.css'
 })
 export class HistoryComponent implements OnInit {
-  historyService = inject(HistoryService);
-  languageService = inject(LanguageService);
-  router = inject(Router);
-  route = inject(ActivatedRoute);
+
+  private historyService = inject(HistoryService);
+  private languageService = inject(LanguageService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   activeTab = signal<'saved' | 'favorites'>('saved');
-  savedCases = signal<SavedCase[]>([]);
-  favoriteCases = signal<SavedCase[]>([]);
+
+  savedCases = signal<HistoryProblem[]>([]);
+  favoriteCases = signal<HistoryProblem[]>([]);
+
   isLoading = signal<boolean>(false);
   showDetailsModal = signal<boolean>(false);
-  selectedCase = signal<SavedCase | null>(null);
-  editingSummary = signal<boolean>(false);
-  editedSummary = signal<string>('');
+  selectedCase = signal<HistoryProblemDetails | null>(null);
+  isDetailsLoading = signal<boolean>(false);
 
   isRtl = this.languageService.isRtl;
 
-  ngOnInit() {
-    // قراءة الـ query parameter لتحديد الـ tab النشط
+  ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      const tab = params['tab'];
-      if (tab === 'favorites') {
-        this.activeTab.set('favorites');
-      } else {
-        this.activeTab.set('saved');
-      }
+      this.activeTab.set(params['tab'] === 'favorites' ? 'favorites' : 'saved');
       this.loadCases();
     });
   }
 
-  loadCases() {
+  loadCases(): void {
     this.isLoading.set(true);
-    
-    this.historyService.getSavedCases().subscribe({
-      next: (cases) => {
-        this.savedCases.set(cases);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error('Error loading saved cases:', err);
-        this.isLoading.set(false);
-      }
-    });
 
-    this.historyService.getFavoriteCases().subscribe({
-      next: (cases) => {
-        this.favoriteCases.set(cases);
+    // 📜 كل المسائل
+    this.historyService.getAllProblems().subscribe({
+      next: problems => {
+        this.savedCases.set(problems);
+        this.favoriteCases.set(problems.filter(p => p.isFavorite));
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Error loading favorite cases:', err);
+      error: err => {
+        console.error('Error loading history:', err);
         this.isLoading.set(false);
       }
     });
   }
 
-  setActiveTab(tab: 'saved' | 'favorites') {
+  setActiveTab(tab: 'saved' | 'favorites'): void {
     this.activeTab.set(tab);
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { tab: tab },
+      queryParams: { tab },
       queryParamsHandling: 'merge'
     });
   }
 
-  toggleFavorite(id: number, isFavorite: boolean) {
-    this.historyService.toggleFavorite(id, !isFavorite).subscribe({
+  toggleFavorite(problem: HistoryProblem): void {
+
+    this.historyService.toggleFavorite(problem.id).subscribe({
+      next: () => this.loadCases(),
+      error: err => console.error('Error toggling favorite:', err)
+    });
+  }
+
+  deleteCase(id: number): void {
+    if (!confirm('هل أنت متأكد من حذف هذه المسألة؟')) return;
+
+    this.historyService.deleteProblem(id).subscribe({
       next: () => {
         this.loadCases();
-        
-        // الانتقال التلقائي بين التبويبات
-        setTimeout(() => {
-          if (this.activeTab() === 'favorites' && !isFavorite) {
-            this.setActiveTab('saved');
-          } else if (this.activeTab() === 'saved' && isFavorite) {
-            this.setActiveTab('favorites');
-          }
-        }, 300);
+        if (this.selectedCase()?.id === id) {
+          this.closeDetailsModal();
+        }
       },
-      error: (err) => {
-        console.error('Error toggling favorite:', err);
+      error: err => console.error('Error deleting case:', err)
+    });
+  }
+
+  viewDetails(problem: HistoryProblem) {
+    this.isDetailsLoading.set(true);
+
+    this.historyService.getProblemDetails(problem.id).subscribe({
+      next: results => {
+        this.selectedCase.set({
+          ...problem,
+          results
+        });
+        this.isDetailsLoading.set(false);
+        this.showDetailsModal.set(true);
+      },
+      error: err => {
+        console.error(err);
+        this.isDetailsLoading.set(false);
       }
     });
   }
 
-  deleteCase(id: number) {
-    if (confirm('هل أنت متأكد من حذف هذا الحساب؟')) {
-      this.historyService.deleteCase(id).subscribe({
-        next: () => {
-          this.loadCases();
-          if (this.selectedCase()?.id === id) {
-            this.closeDetailsModal();
-          }
-        },
-        error: (err) => {
-          console.error('Error deleting case:', err);
-        }
-      });
-    }
-  }
-
-  viewDetails(caseItem: SavedCase) {
-    this.selectedCase.set(caseItem);
-    this.editedSummary.set(caseItem.heirs);
-    this.editingSummary.set(false);
-    this.showDetailsModal.set(true);
-  }
-
-  closeDetailsModal() {
+  closeDetailsModal(): void {
     this.showDetailsModal.set(false);
     this.selectedCase.set(null);
   }
 
-  startEditingSummary() {
-    this.editingSummary.set(true);
+  getHeirArabicText(heirType: string): string {
+    const heirMap: { [key: string]: string } = {
+      'HUSBAND': 'الزوج',
+      'WIFE': 'الزوجة',
+      'FATHER': 'الأب',
+      'MOTHER': 'الأم',
+      'GRANDFATHER': 'الجد لأب',
+      'GRANDFATHER_MATERNAL': 'الجد لأم',
+      'GRANDMOTHER_PATERNAL': 'الجدة لأب',
+      'GRANDMOTHER_MATERNAL': 'الجدة لأم',
+      'SON': 'الابن',
+      'DAUGHTER': 'البنت',
+      'SON_OF_SON': 'ابن الابن',
+      'DAUGHTER_OF_SON': 'بنت الابن',
+      'FULL_BROTHER': 'الأخ الشقيق',
+      'FULL_SISTER': 'الأخت الشقيقة',
+      'PATERNAL_BROTHER': 'الأخ لأب',
+      'PATERNAL_SISTER': 'الأخت لأب',
+      'MATERNAL_BROTHER': 'الأخ لأم',
+      'MATERNAL_SISTER': 'الأخت لأم'
+    };
+    return heirMap[heirType] || heirType;
   }
 
-  saveEditedSummary() {
-    if (this.selectedCase() && this.editedSummary().trim()) {
-      this.historyService.updateCase(this.selectedCase()!.id, { 
-        heirs: this.editedSummary() 
-      }).subscribe({
-        next: () => {
-          this.loadCases();
-          this.selectedCase.set({ 
-            ...this.selectedCase()!, 
-            heirs: this.editedSummary() 
-          });
-          this.editingSummary.set(false);
-        },
-        error: (err) => {
-          console.error('Error updating summary:', err);
-        }
-      });
-    }
+  getFixedShareArabicText(fixedShare: string | null): string {
+    if (!fixedShare) return '';
+    const fixedShareMap: { [key: string]: string } = {
+      'HALF': 'النصف',
+      'QUARTER': 'الربع',
+      'EIGHTH': 'الثمن',
+      'THIRD': 'الثلث',
+      'TWO_THIRDS': 'الثلثين',
+      'SIXTH': 'السدس'
+    };
+    return fixedShareMap[fixedShare] || fixedShare;
   }
 
-  cancelEditingSummary() {
-    this.editedSummary.set(this.selectedCase()?.heirs || '');
-    this.editingSummary.set(false);
+  getShareTypeArabicText(shareType: string): string {
+    const shareTypeMap: { [key: string]: string } = {
+      'FIXED': 'فرض',
+      'TAASIB': 'تعصيب',
+      'RADD': 'رد',
+      'Mahgub': 'محجوب',
+      'MALE_DOUBLE_FEMALE': 'للذكر مثل حظ الأنثيين'
+    };
+    return shareTypeMap[shareType] || shareType;
   }
+
 }

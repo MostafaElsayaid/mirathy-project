@@ -46,6 +46,7 @@ export class Login {
     this.authService.login(email, password).subscribe({
       next: () => {
         this.router.navigate(['/home']);
+        console.log(localStorage.getItem("token"))
         this.isLoading = false;
       },
       error: (err) => {

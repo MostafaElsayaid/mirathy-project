@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HeirResult } from './models';
 import { Observable, of } from 'rxjs';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 export interface SavedCase {
   id: number;
   date: string;
   estate: number;
   results: HeirResult[];
-  heirs: string;  // تغيير من heirsSummary إلى heirs لتتوافق مع HTML
+  heirs: string;
   isFavorite: boolean;
 }
 
@@ -15,80 +16,78 @@ export interface SavedCase {
   providedIn: 'root'
 })
 export class HistoryService {
-  
-  addCase(results: HeirResult[], estate: number, heirs: string, isFavorite: boolean) {
-    // تحويل النتائج إلى تفاصيل لتتوافق مع الواجهة
-    const details = results.map(result => ({
-      heir: result.heir,
-      count: result.count,
-      share: result.share,
-      amount: result.amount
-    }));
 
-    const savedCase: SavedCase = {
-      id: Date.now(),
-      date: new Date().toISOString(),
-      estate: estate,
-      results: results,
-      heirs: heirs,  // استخدام heirs بدلاً من heirsSummary
-      isFavorite: isFavorite
-    };
+  private readonly baseUrl =
+    'http://localhost:8087/api/v1/api/v1/auth';
 
-    // حفظ في localStorage
-    if (localStorage) {
-      const savedCases = JSON.parse(localStorage.getItem('inheritanceCases') || '[]');
-      savedCases.push(savedCase);
-      localStorage.setItem('inheritanceCases', JSON.stringify(savedCases));
-    }
+  constructor(private http: HttpClient) {}
 
-    console.log('Case saved:', savedCase);
-    return of(savedCase);
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
   }
 
-  getCases(): SavedCase[] {
-    if (localStorage) {
-      const cases = JSON.parse(localStorage.getItem('inheritanceCases') || '[]');
-      // تحويل التاريخ من نص إلى كائن تاريخ لعرضه بشكل صحيح
-      return cases.map((c: SavedCase) => ({
-        ...c,
-        date: c.date // حافظ على النص كما هو
-      }));
-    }
-    return [];
+  getAllProblems(): Observable<HistoryProblem[]> {
+    return this.http.get<HistoryProblem[]>(
+      `${this.baseUrl}/getAllProblem`,
+      { headers: this.getAuthHeaders() }
+    );
   }
 
-  getSavedCases(): Observable<SavedCase[]> {
-    const cases = this.getCases().filter(c => !c.isFavorite);
-    return of(cases);
+  getFavoriteProblems(): Observable<HistoryProblem[]> {
+    return this.http.get<HistoryProblem[]>(
+      `${this.baseUrl}/getAllFavoriteProblem`,
+      { headers: this.getAuthHeaders() }
+    );
   }
 
-  getFavoriteCases(): Observable<SavedCase[]> {
-    const cases = this.getCases().filter(c => c.isFavorite);
-    return of(cases);
+  toggleFavorite(problemId: number): Observable<void> {
+    return this.http.put<void>(
+      `${this.baseUrl}/isFavorite/${problemId}`,
+      {},
+      { headers: this.getAuthHeaders() }
+    );
   }
 
-  updateCase(id: number, updates: Partial<SavedCase>) {
-    if (localStorage) {
-      const savedCases = JSON.parse(localStorage.getItem('inheritanceCases') || '[]');
-      const index = savedCases.findIndex((c: SavedCase) => c.id === id);
-      if (index !== -1) {
-        savedCases[index] = { ...savedCases[index], ...updates };
-        localStorage.setItem('inheritanceCases', JSON.stringify(savedCases));
-      }
-    }
-    return of(null);
+  getProblemDetails(id: number): Observable<ProblemResult[]> {
+    return this.http.get<ProblemResult[]>(
+      `${this.baseUrl}/problem/${id}`,
+      { headers: this.getAuthHeaders() }
+    );
   }
 
-  deleteCase(id: number) {
-    if (localStorage) {
-      const savedCases = JSON.parse(localStorage.getItem('inheritanceCases') || '[]');
-      const filtered = savedCases.filter((c: SavedCase) => c.id !== id);
-      localStorage.setItem('inheritanceCases', JSON.stringify(filtered));
-    }
-    return of(null);
-  }
-
-  toggleFavorite(id: number, isFavorite: boolean) {
-    return this.updateCase(id, { isFavorite });
+  deleteProblem(problemId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/problem/${problemId}`,
+      { headers: this.getAuthHeaders() }
+    );
   }
 }
+export interface HistoryProblem {
+  id: number;
+  title: string;
+  createdAt: string;
+  isFavorite: boolean;
+}
+export interface ProblemResult {
+  heirType: string;
+  shareType: string;
+  fixedShare: string;
+  shareValue: number;
+  memberCount: number;
+  reason: string;
+}
+export interface HistoryProblemDetails {
+  id: number;
+  title: string;
+  createdAt: string;
+  isFavorite: boolean;
+  estate?: number;      // optional لو مش راجع
+  heirs?: string;       // optional
+  results: ProblemResult[];
+}
+
+
