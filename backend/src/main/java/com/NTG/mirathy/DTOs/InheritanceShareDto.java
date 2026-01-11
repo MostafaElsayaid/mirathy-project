@@ -36,4 +36,16 @@ public record InheritanceShareDto(
                 reason
         );
     }
+    public InheritanceShareDto withReason(String reason) {
+        return new InheritanceShareDto(
+                this.heirType,
+                this.count,
+                this.amountPerPerson,
+                this.totalAmount,
+                this.shareType,
+                this.fixedShare,
+                reason
+        );
+    }
+
 }

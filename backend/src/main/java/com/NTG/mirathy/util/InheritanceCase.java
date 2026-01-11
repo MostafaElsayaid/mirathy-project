@@ -53,7 +53,15 @@ public class InheritanceCase {
     public boolean hasSpouse() {
         return has(HeirType.HUSBAND) || has(HeirType.WIFE);
     }
-
+    public boolean isHajariCase() {
+        boolean hasMoreThanOneMaternalSibling = false;
+        if (count(HeirType.MATERNAL_SIBLINGS ) >=2)
+            hasMoreThanOneMaternalSibling = true;
+        return has(HeirType.HUSBAND)
+                && has(HeirType.MOTHER)
+                && (hasMoreThanOneMaternalSibling)
+                && has(HeirType.Full_SIBLINGS );
+    }
     public int countMaleChildren() {
         return count(HeirType.SON);
     }
