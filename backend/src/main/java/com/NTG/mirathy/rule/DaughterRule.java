@@ -10,42 +10,47 @@ public class DaughterRule implements InheritanceRule {
 
     @Override
     public boolean canApply(InheritanceCase c) {
-        // تنطبق إذا فيه بنت واحدة أو أكثر
         return c.has(HeirType.DAUGHTER);
     }
 
     @Override
     public InheritanceShareDto calculate(InheritanceCase c) {
-        HeirType heirType = HeirType.DAUGHTER;
-        int count = c.count(heirType);
-        ShareType shareType;
-        FixedShare fixedShare = null;
-        String reason = "";
+        int count = c.count(HeirType.DAUGHTER);
 
-        if (c.has(HeirType.SON)) {
-            // تعصيب مع الابن
-            shareType = ShareType.TAASIB;
-            reason = "يرث الأبناء الذكور والإناث معا تعصيبا للذكر مثل حظ الأنثيين لقوله تعالى (يُوصِيكُمُ اللَّهُ فِي أَوْلادِكُمْ لِلذَّكَرِ مِثْلُ حَظِّ الأُنثَيَيْنِ)";
+        if (count == 1 && !c.has(HeirType.SON)) {
+            // بنت واحدة بدون ابن: نصف فرضًا
+            return new InheritanceShareDto(
+                    HeirType.DAUGHTER,
+                    count,
+                    null,
+                    null,
+                    ShareType.MIXED,
+                    FixedShare.HALF,
+                    "ترث النصف فرضًا والباقي تعصيبًا مع الأب أو الإخوة"
+            );
+        } else if (count >= 2 && !c.has(HeirType.SON)) {
+            // بنتان أو أكثر بدون ابن: ثلثان فرضًا
+            return new InheritanceShareDto(
+                    HeirType.DAUGHTER,
+                    count,
+                    null,
+                    null,
+                    ShareType.MIXED,
+                    FixedShare.TWO_THIRDS,
+                    "ترث الثلثين فرضًا والباقي تعصيبًا مع الأب أو الإخوة"
+            );
         } else {
-            // بدون ابن → فرض ثابت
-            shareType = ShareType.FIXED;
-            if (count == 1) {
-                fixedShare = FixedShare.HALF;
-                reason = "ترث البنت الواحدة النصف إذا لم يكن لها أخ يعصبها. لقوله تعالى (يُوصِيكُمُ اللَّهُ فِي أَوْلادِكُمْ لِلذَّكَرِ مِثْلُ حَظِّ الأُنثَيَيْنِ فَإِنْ كُنَّ نِسَاءً فَوْقَ اثْنَتَيْنِ فَلَهُنَّ ثُلُثَا مَا تَرَكَ وَإِنْ كَانَتْ وَاحِدَةً فَلَهَا النِّصْفُ)";
-            } else {
-                fixedShare = FixedShare.TWO_THIRDS;
-                reason = "ترث البنتين فأكثر الثلثين إذا لم يكن لهن أخ يعصبهن. لقوله تعالى (يُوصِيكُمُ اللَّهُ فِي أَوْلادِكُمْ لِلذَّكَرِ مِثْلُ حَظِّ الأُنثَيَيْنِ فَإِنْ كُنَّ نِسَاءً فَوْقَ اثْنَتَيْنِ فَلَهُنَّ ثُلُثَا مَا تَرَكَ وَإِنْ كَانَتْ وَاحِدَةً فَلَهَا النِّصْفُ) ولأنه ﷺ أعطى الثلثين لبنتى سعد بن الربيع، و الاثنتين لهما حكم فوق اثنتين لأن القرآن أيضا ذكر حُكم الأختين أن لهما الثلثين (فَإِن كَانَتَا اثْنَتَيْنِ فَلَهُمَا الثُّلُثَانِ مِمَّا تَرَكَ) فيتم حمل البنتين على الأختين ، وكذلك حمل الأكثر من أختين على قوله فى البنات (فَوْقَ اثْنَتَيْنِ).";
-            }
+            // مع وجود ابن: تعصيب بالغير
+            return new InheritanceShareDto(
+                    HeirType.DAUGHTER,
+                    count,
+                    null,
+                    null,
+                    ShareType.TAASIB,
+                    null,
+                    "ترث تعصيبًا مع الإخوة الذكور"
+            );
         }
-
-        return new InheritanceShareDto(
-                heirType,
-                count,
-                null,
-                null,
-                shareType,
-                fixedShare,
-                reason
-        );
     }
+
 }

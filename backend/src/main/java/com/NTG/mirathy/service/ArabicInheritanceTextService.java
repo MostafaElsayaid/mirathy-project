@@ -48,4 +48,5 @@ public class ArabicInheritanceTextService {
         return text.toString();
     }
 
+
 }

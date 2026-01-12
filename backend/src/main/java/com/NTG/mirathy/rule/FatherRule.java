@@ -16,14 +16,12 @@ public class FatherRule implements InheritanceRule {
 
     @Override
     public InheritanceShareDto calculate(InheritanceCase c) {
-
         int count = c.count(HeirType.FATHER);
 
-        // وجود فرع وارث
-        if (c.hasDescendant()) {
+        boolean hasMaleDescendant = c.hasMaleDescendant();
 
-            // فرع وارث ذكر → سدس فقط
-            if (c.hasMaleChild()) {
+        if (c.hasDescendant()) {
+            if (hasMaleDescendant) {
                 return new InheritanceShareDto(
                         HeirType.FATHER,
                         count,
@@ -31,23 +29,21 @@ public class FatherRule implements InheritanceRule {
                         null,
                         ShareType.FIXED,
                         FixedShare.SIXTH,
-                        "يرث الأب السدس لوجود فرع وارث ذكر"
+                        "يرث الأب السدس فقط لوجود فرع وارث ذكر (المسألة الحجرية)"
+                );
+            } else if (c.hasFemaleDescendantOnly()) {
+                return new InheritanceShareDto(
+                        HeirType.FATHER,
+                        count,
+                        null,
+                        null,
+                        ShareType.MIXED,
+                        FixedShare.SIXTH,
+                        "يرث الأب السدس فرضًا والباقي تعصيبًا لوجود فرع وارث أنثى"
                 );
             }
-
-            // فرع وارث أنثى فقط → سدس + تعصيب
-            return new InheritanceShareDto(
-                    HeirType.FATHER,
-                    count,
-                    null,
-                    null,
-                    ShareType.MIXED,
-                    FixedShare.SIXTH,
-                    "يرث الأب السدس فرضًا والباقي تعصيبًا لوجود فرع وارث أنثى"
-            );
         }
 
-        // لا يوجد فرع وارث
         return new InheritanceShareDto(
                 HeirType.FATHER,
                 count,
@@ -58,4 +54,5 @@ public class FatherRule implements InheritanceRule {
                 "يرث الأب الباقي تعصيبًا لعدم وجود فرع وارث"
         );
     }
-    }
+}
+

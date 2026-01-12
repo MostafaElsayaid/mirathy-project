@@ -17,29 +17,26 @@ public class GrandfatherRule implements InheritanceRule {
     public InheritanceShareDto calculate(InheritanceCase c) {
         HeirType heirType = HeirType.GRANDFATHER;
         int count = c.count(heirType);
-        ShareType shareType = null;
+        ShareType shareType;
         FixedShare fixedShare = null;
-        String reason = "";
+        String reason;
 
-        boolean hasChildren = c.hasChildren();
-        boolean hasSiblings = c.has(HeirType.FULL_BROTHER) ||
-                c.has(HeirType.FULL_SISTER) ||
-                c.has(HeirType.PATERNAL_BROTHER) ||
-                c.has(HeirType.PATERNAL_SISTER);
+        boolean hasMaleDescendant = c.hasMaleDescendant();
+        boolean hasDescendant = c.hasDescendant();
 
-        if (hasChildren) {
-            // مع الفرع الوارث: سدس فقط
-            shareType = ShareType.FIXED;
-            fixedShare = FixedShare.SIXTH;
-            reason = "الجد يرث السدس لوجود فرع وارث";
-        } else if (hasSiblings) {
-            // مع الإخوة: قد يرث معهم أو يحجبهم حسب المسألة
-            shareType = ShareType.TAASIB;
-            reason = "الجد يرث تعصيبًا مع الإخوة في بعض الحالات";
+        if (hasDescendant) {
+            if (hasMaleDescendant) {
+                shareType = ShareType.FIXED;
+                fixedShare = FixedShare.SIXTH;
+                reason = "الجد يرث السدس فقط لوجود فرع وارث ذكر (المسألة الحجرية)";
+            } else {
+                shareType = ShareType.MIXED;
+                fixedShare = FixedShare.SIXTH;
+                reason = "الجد يرث السدس فرضًا والباقي تعصيبًا لوجود فرع وارث أنثى";
+            }
         } else {
-            // بدون فرع ولا إخوة: تعصيب كامل
             shareType = ShareType.TAASIB;
-            reason = "الجد يرث تعصيبًا لعدم وجود فرع وارث";
+            reason = "الجد يرث الباقي تعصيبًا لعدم وجود فرع وارث";
         }
 
         return new InheritanceShareDto(

@@ -14,7 +14,8 @@ public enum FixedShare {
     TWO_THIRDS(2, 3),
     THIRD(1, 3),
     SIXTH(1, 6),
-    THIRD_OF_REMAINDER(1, 3);
+    THIRD_OF_REMAINDER(1, 3),
+    THIRD_REMAINDER_SHARED( 1, 3);
 
     private final int numerator;
     private final int denominator;

@@ -1,12 +1,12 @@
 package com.NTG.mirathy.Entity.Enum;
 
+import com.NTG.mirathy.util.InheritanceCase;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
 public enum HeirType {
-
     // ====== الأزواج ======
     HUSBAND("زوج", 1),
     WIFE("زوجة", 4),
@@ -51,33 +51,8 @@ public enum HeirType {
     private final String arabicName;
     private final Integer MAX_ALLOWED;
 
-        //منطق التعصيب
-
-//    public boolean isTaasib() {
-//        return switch (this) {
-//
-//            case SON, DAUGHTER,
-//                 SON_OF_SON, DAUGHTER_OF_SON,
-//
-//
-//                 FULL_BROTHER, FULL_SISTER,
-//                 PATERNAL_BROTHER, PATERNAL_SISTER,
-//
-//                 SON_OF_FULL_BROTHER,
-//                 SON_OF_PATERNAL_BROTHER,
-//                 FULL_UNCLE,
-//                 PATERNAL_UNCLE,
-//                 SON_OF_FULL_UNCLE,
-//                 SON_OF_PATERNAL_UNCLE
-//                    -> true;
-//
-//            default -> false;
-//        };
-//    }
-
-    public int getAsabaUnit(HeirType type) {
-        return switch (type) {
-
+    public int getAsabaUnit() {
+        return switch (this) {
             // الذكور = 2
             case SON,
                  SON_OF_SON,
@@ -98,20 +73,39 @@ public enum HeirType {
                  PATERNAL_SISTER
                     -> 1;
 
-            // عصبة بالنفس بوحدة واحدة
-            case FATHER,
-                 GRANDFATHER
+            // الأب والجد: 1 عندما يكونان عاصبين
+            case FATHER, GRANDFATHER
                     -> 1;
 
             default -> 0;
         };
     }
 
+    public AsabaType getAsabaType() {
+        return switch (this) {
+            // عصبة بالنفس
+            case SON, SON_OF_SON,
+                 FATHER, GRANDFATHER,
+                 FULL_BROTHER, PATERNAL_BROTHER,
+                 FULL_UNCLE, PATERNAL_UNCLE
+                    -> AsabaType.BY_SELF;
 
+            // عصبة بالغير
+            case DAUGHTER, DAUGHTER_OF_SON,
+                 FULL_SISTER, PATERNAL_SISTER
+                    -> AsabaType.WITH_OTHER;
+
+            // عصبة مع الغير
+            case SON_OF_FULL_BROTHER, SON_OF_PATERNAL_BROTHER,
+                 SON_OF_FULL_UNCLE, SON_OF_PATERNAL_UNCLE
+                    -> AsabaType.WITH_GHERR;
+
+            default -> AsabaType.NONE;
+        };
+    }
 
     public int getUnit() {
         return switch (this) {
-
             case SON,
                  SON_OF_SON,
                  FULL_BROTHER,
@@ -133,7 +127,17 @@ public enum HeirType {
             default -> 0;
         };
     }
+
     public boolean isSpouse() {
         return this == HUSBAND || this == WIFE;
+    }
+
+    public boolean canBeAsaba(InheritanceCase context) {
+        if (this == FATHER || this == GRANDFATHER) {
+            boolean hasMaleDescendant = context.has(HeirType.SON) ||
+                    (context.has(HeirType.SON_OF_SON) && !context.has(HeirType.SON));
+            return !hasMaleDescendant;
+        }
+        return this.getAsabaUnit() > 0;
     }
 }

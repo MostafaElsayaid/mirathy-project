@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MotherRule implements InheritanceRule {
 
+
     @Override
     public boolean canApply(InheritanceCase c) {
         return c.has(HeirType.MOTHER);
@@ -15,31 +16,38 @@ public class MotherRule implements InheritanceRule {
 
     @Override
     public InheritanceShareDto calculate(InheritanceCase c) {
-
         HeirType heirType = HeirType.MOTHER;
         int count = c.count(heirType);
         ShareType shareType = ShareType.FIXED;
         FixedShare fixedShare;
         String reason;
 
-        int totalBrothersSisters =
-                c.count(HeirType.FULL_BROTHER) +
-                        c.count(HeirType.FULL_SISTER) +
-                        c.count(HeirType.PATERNAL_BROTHER) +
-                        c.count(HeirType.PATERNAL_SISTER);
+        int totalBrothersSisters = c.countSiblings();
+        boolean hasMaternalSiblings = c.hasMaternalSiblings();
+        boolean hasFullSiblings = c.hasFullSiblings();
+        boolean hasSpouse = c.hasSpouse();
 
-        // ====== العمريّة ======
-        if (isUmariyya(c)) {
-            fixedShare = FixedShare.THIRD_OF_REMAINDER;
-            reason = "ترث الأم ثلث الباقي بعد نصيب الزوجة. قضى عمر رضى الله عنه بذلك لأن الله تعالى قدّر للأب ضعفها إذا انفردا بكل التركة فيكون له ضعفها من البعض أيضا إذا انفردا ببعض التركة";
+        // ====== المسألة الحمارية ======
+        // زوج/زوجة + أم + إخوة لأم + إخوة أشقاء
+        if (c.isHimariyyaCase()) {
+            fixedShare = FixedShare.THIRD_REMAINDER_SHARED; // ثلث الباقي مشترك مع الإخوة لأم
+            reason = "ترث الأم ثلث الباقي بعد نصيب الزوج/الزوجة وتتقاسمه مع الإخوة لأم (المسألة الحمارية)";
         }
-
+        // ====== المسألة العمرية البسيطة ======
+        else if (c.isSimpleUmariyya()) {
+            fixedShare = FixedShare.THIRD_OF_REMAINDER;
+            reason = "ترث الأم ثلث الباقي بعد نصيب الزوج/الزوجة (المسألة العمرية)";
+        }
+        // ====== حالة الأم مع إخوة لأم فقط (بدون إخوة أشقاء) ======
+        else if (hasSpouse && hasMaternalSiblings && !hasFullSiblings) {
+            fixedShare = FixedShare.THIRD; // تأخذ الثلث كاملاً
+            reason = "ترث الأم الثلث كاملاً مع الإخوة لأم يشاركونها فيه";
+        }
         // ====== السدس ======
         else if (c.hasDescendant() || totalBrothersSisters >= 2) {
             fixedShare = FixedShare.SIXTH;
-            reason = "ترث الأم السدس عند وجود الفرع الوارث مذكراً كان أو مؤنثاً، أو عند وجود اكثر من أخ. قال الله تعالى: (...وَلأَبَوَيْهِ لِكُلِّ وَاحِدٍ مِنْهُمَا السُّدُسُ مِمَّا تَرَكَ إِنْ كَانَ لَهُ وَلَدٌ فَإِنْ لَمْ يَكُنْ لَهُ وَلَدٌ وَوَرِثَهُ أَبَوَاهُ فَلأُمِّهِ الثُّلُثُ فَإِنْ كَانَ لَهُ إِخْوَةٌ فَلأُمِّهِ السُّدُسُ ..)";
+            reason = "ترث الأم السدس عند وجود الفرع الوارث أو عند وجود أكثر من أخ";
         }
-
         // ====== الثلث ======
         else {
             fixedShare = FixedShare.THIRD;
@@ -55,13 +63,5 @@ public class MotherRule implements InheritanceRule {
                 fixedShare,
                 reason
         );
-    }
-
-    private boolean isUmariyya(InheritanceCase c) {
-        return c.has(HeirType.FATHER)
-                && c.has(HeirType.MOTHER)
-                && (c.has(HeirType.WIFE) || c.has(HeirType.HUSBAND))
-               && c.mapSize()==3;
-
     }
 }

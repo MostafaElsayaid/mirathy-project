@@ -12,7 +12,10 @@ public record InheritanceShareDto(
         ShareType shareType,
         FixedShare fixedShare,
         String reason
+
 ) {
+
+
     public InheritanceShareDto withAmounts(Double amountPerPerson, Double totalAmount) {
         return new InheritanceShareDto(
                 heirType,
@@ -22,6 +25,7 @@ public record InheritanceShareDto(
                 shareType,
                 fixedShare,
                 reason
+
         );
     }
 
@@ -34,6 +38,7 @@ public record InheritanceShareDto(
                 shareType,
                 fixedShare,
                 reason
+
         );
     }
 }
